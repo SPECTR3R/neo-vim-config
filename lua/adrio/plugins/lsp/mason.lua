@@ -40,6 +40,7 @@ return {
 				"emmet_ls",
 				"prismals",
 				"pyright",
+				"angularls",
 			},
 		})
 
