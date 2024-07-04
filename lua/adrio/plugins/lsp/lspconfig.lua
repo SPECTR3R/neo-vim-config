@@ -90,7 +90,7 @@ return {
 			["svelte"] = function()
 				lspconfig["svelte"].setup({
 					capabilities = capabilities,
-					on_attach = function(client, bufnr)
+					on_attach = function(client, _)
 						vim.api.nvim_create_autocmd("BufWritePost", {
 							pattern = { "*.js", "*.ts" },
 							callback = function(ctx)
@@ -111,13 +111,14 @@ return {
 				end
 
 				local angularls_path = mason_registry.get_package("angular-language-server"):get_install_path()
-
+				local project_root = vim.fn.getcwd()
 				local cmd = {
 					"ngserver",
 					"--stdio",
 					"--tsProbeLocations",
 					table.concat({
 						angularls_path,
+						project_root,
 						vim.uv.cwd(),
 					}, ","),
 					"--ngProbeLocations",
@@ -127,19 +128,15 @@ return {
 					}, ","),
 				}
 
-				local config = {
-					cmd = cmd,
-					on_new_config = function(new_config, new_root_dir)
-						new_config.cmd = cmd
-					end,
-				}
-				require("lspconfig").angularls.setup({ config })
-
 				lspconfig["angularls"].setup({
 					capabilities = capabilities,
 					cmd = cmd,
-					on_new_config = function(new_config, new_root_dir)
+					on_new_config = function(new_config, _)
 						new_config.cmd = cmd
+					end,
+					root_dir = function(fname)
+						return lspconfig.util.root_pattern("angular.json", "nx.json")(fname)
+							or lspconfig.util.root_pattern("package.json", "tsconfig.json", ".git")(fname)
 					end,
 				})
 			end,
@@ -149,6 +146,55 @@ return {
 				lspconfig["graphql"].setup({
 					capabilities = capabilities,
 					filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
+				})
+			end,
+
+			-- configure json language server
+			["jsonls"] = function()
+				lspconfig["jsonls"].setup({
+					capabilities = capabilities,
+					filetypes = { "json", "jsonc" },
+				})
+			end,
+
+			-- configure the gopls language server
+			["gopls"] = function()
+				local util = require("lspconfig.util")
+				local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+				lspconfig["gopls"].setup({
+					cmd = { "gopls" },
+					filetypes = { "go", "gomod", "gowork", "gotmpl" },
+					capabilities = capabilities,
+					root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+					on_attach = function(client, bufnr)
+						-- Your existing keymaps and other on_attach logic here
+
+						-- Add the formatting setup
+						if client.supports_method("textDocument/formatting") then
+							vim.api.nvim_clear_autocmds({
+								group = augroup,
+								buffer = bufnr,
+							})
+							vim.api.nvim_create_autocmd("BufWritePre", {
+								group = augroup,
+								buffer = bufnr,
+								callback = function()
+									vim.lsp.buf.format({ bufnr = bufnr })
+								end,
+							})
+						end
+					end,
+					settings = {
+						gopls = {
+							analyses = {
+								unusedparams = true,
+							},
+							completeUnimported = true,
+							usePlaceholders = true,
+							staticcheck = true,
+						},
+					},
 				})
 			end,
 

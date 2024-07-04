@@ -41,6 +41,8 @@ return {
 				"prismals",
 				"pyright",
 				"angularls",
+				"jsonls",
+				"gopls",
 			},
 		})
 
@@ -52,6 +54,9 @@ return {
 				"black", -- python formatter
 				"pylint", -- python linter
 				"eslint_d", -- js linter
+				"gofumpt",
+				"goimports",
+				"golines",
 			},
 		})
 	end,
