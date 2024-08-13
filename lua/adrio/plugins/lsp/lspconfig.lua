@@ -5,240 +5,169 @@ return {
 		"hrsh7th/cmp-nvim-lsp",
 		{ "antosha417/nvim-lsp-file-operations", config = true },
 		{ "folke/neodev.nvim", opts = {} },
+		"mason.nvim",
+		"mason-lspconfig.nvim",
 	},
 	config = function()
-		-- import lspconfig plugin
 		local lspconfig = require("lspconfig")
-
-		-- import mason_lspconfig plugin
 		local mason_lspconfig = require("mason-lspconfig")
-
-		-- import cmp-nvim-lsp plugin
 		local cmp_nvim_lsp = require("cmp_nvim_lsp")
+		local keymap = vim.keymap
 
-		local keymap = vim.keymap -- for conciseness
+		-- Helper function for setting up LSP keymaps
+		local function setup_lsp_keymaps(bufnr)
+			local opts = { buffer = bufnr, silent = true }
+			local keymaps = {
+				{ "n", "gR", "<cmd>Telescope lsp_references<CR>", "Show LSP references" },
+				{ "n", "gD", vim.lsp.buf.declaration, "Go to declaration" },
+				{ "n", "gd", "<cmd>Telescope lsp_definitions<CR>", "Show LSP definitions" },
+				{ "n", "gi", "<cmd>Telescope lsp_implementations<CR>", "Show LSP implementations" },
+				{ "n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", "Show LSP type definitions" },
+				{ { "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "See available code actions" },
+				{ "n", "<leader>rn", vim.lsp.buf.rename, "Smart rename" },
+				{ "n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", "Show buffer diagnostics" },
+				{ "n", "<leader>d", vim.diagnostic.open_float, "Show line diagnostics" },
+				{ "n", "[d", vim.diagnostic.goto_prev, "Go to previous diagnostic" },
+				{ "n", "]d", vim.diagnostic.goto_next, "Go to next diagnostic" },
+				{ "n", "K", vim.lsp.buf.hover, "Show documentation for what is under cursor" },
+				{ "n", "<leader>rs", ":LspRestart<CR>", "Restart LSP" },
+			}
 
+			for _, map in ipairs(keymaps) do
+				opts.desc = map[4]
+				keymap.set(map[1], map[2], map[3], opts)
+			end
+		end
+
+		-- Set up LSP keymaps on attach
 		vim.api.nvim_create_autocmd("LspAttach", {
 			group = vim.api.nvim_create_augroup("UserLspConfig", {}),
 			callback = function(ev)
-				-- Buffer local mappings.
-				-- See `:help vim.lsp.*` for documentation on any of the below functions
-				local opts = { buffer = ev.buf, silent = true }
-
-				-- set keybinds
-				opts.desc = "Show LSP references"
-				keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
-
-				opts.desc = "Go to declaration"
-				keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
-
-				opts.desc = "Show LSP definitions"
-				keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- show lsp definitions
-
-				opts.desc = "Show LSP implementations"
-				keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations
-
-				opts.desc = "Show LSP type definitions"
-				keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
-
-				opts.desc = "See available code actions"
-				keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
-
-				opts.desc = "Smart rename"
-				keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
-
-				opts.desc = "Show buffer diagnostics"
-				keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts) -- show  diagnostics for file
-
-				opts.desc = "Show line diagnostics"
-				keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
-
-				opts.desc = "Go to previous diagnostic"
-				keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- jump to previous diagnostic in buffer
-
-				opts.desc = "Go to next diagnostic"
-				keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
-
-				opts.desc = "Show documentation for what is under cursor"
-				keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
-
-				opts.desc = "Restart LSP"
-				keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+				setup_lsp_keymaps(ev.buf)
 			end,
 		})
 
-		-- used to enable autocompletion (assign to every lsp server config)
+		-- Set up capabilities
 		local capabilities = cmp_nvim_lsp.default_capabilities()
 
-		-- Change the Diagnostic symbols in the sign column (gutter)
-		-- (not in youtube nvim video)
+		-- Set up diagnostic signs
 		local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
 		for type, icon in pairs(signs) do
 			local hl = "DiagnosticSign" .. type
 			vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
 		end
 
-		-- default handler for installed servers
-		mason_lspconfig.setup_handlers({
-			function(server_name)
-				lspconfig[server_name].setup({
-					capabilities = capabilities,
-				})
-			end,
+		-- Default handler for installed servers
+		local function default_on_attach(client, bufnr)
+			-- Add any default on_attach logic here
+		end
 
-			-- configure svelte server
-			["svelte"] = function()
-				lspconfig["svelte"].setup({
-					capabilities = capabilities,
-					on_attach = function(client, _)
-						vim.api.nvim_create_autocmd("BufWritePost", {
-							pattern = { "*.js", "*.ts" },
-							callback = function(ctx)
-								-- Here use ctx.match instead of ctx.file
-								client.notify("$/onDidChangeTsOrJsFile", { uri = ctx.match })
+		-- Server-specific configurations
+		local server_configs = {
+			svelte = {
+				on_attach = function(client, bufnr)
+					default_on_attach(client, bufnr)
+					vim.api.nvim_create_autocmd("BufWritePost", {
+						pattern = { "*.js", "*.ts" },
+						callback = function(ctx)
+							client.notify("$/onDidChangeTsOrJsFile", { uri = ctx.match })
+						end,
+					})
+				end,
+			},
+			angularls = {
+				setup = function()
+					local ok, mason_registry = pcall(require, "mason-registry")
+					if not ok then
+						vim.notify("mason-registry could not be loaded", vim.log.levels.ERROR)
+						return
+					end
+
+					local angularls_path = mason_registry.get_package("angular-language-server"):get_install_path()
+					local project_root = vim.fn.getcwd()
+					local cmd = {
+						"ngserver",
+						"--stdio",
+						"--tsProbeLocations",
+						table.concat({ angularls_path, project_root, vim.uv.cwd() }, ","),
+						"--ngProbeLocations",
+						table.concat({ angularls_path .. "/node_modules/@angular/language-server", vim.uv.cwd() }, ","),
+					}
+
+					return {
+						cmd = cmd,
+						on_new_config = function(new_config, _)
+							new_config.cmd = cmd
+						end,
+						root_dir = function(fname)
+							return lspconfig.util.root_pattern("angular.json", "nx.json")(fname)
+								or lspconfig.util.root_pattern("package.json", "tsconfig.json", ".git")(fname)
+						end,
+					}
+				end,
+			},
+			graphql = {
+				filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
+			},
+			jsonls = {
+				filetypes = { "json", "jsonc" },
+			},
+			gopls = {
+				cmd = { "gopls" },
+				filetypes = { "go", "gomod", "gowork", "gotmpl" },
+				root_dir = lspconfig.util.root_pattern("go.work", "go.mod"),
+				on_attach = function(client, bufnr)
+					default_on_attach(client, bufnr)
+					if client.supports_method("textDocument/formatting") then
+						-- //the following line will be adding a debug print statement
+						vim.api.nvim_create_autocmd("BufWritePre", {
+
+							group = vim.api.nvim_create_augroup("LspFormatting", {}),
+							buffer = bufnr,
+							callback = function()
+								vim.lsp.buf.format({ bufnr = bufnr })
 							end,
 						})
-					end,
-				})
-			end,
+					end
+				end,
+				settings = {
+					gopls = {
+						analyses = { unusedparams = true },
+						completeUnimported = true,
+						usePlaceholders = true,
+						staticcheck = true,
+					},
+				},
+			},
+			emmet_ls = {
+				filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
+			},
+			astro = {
+				filetypes = { "astro" },
+			},
+			lua_ls = {
+				settings = {
+					Lua = {
+						diagnostics = { globals = { "vim" } },
+						completion = { callSnippet = "Replace" },
+					},
+				},
+			},
+		}
 
-			-- configure angular language server
-			["angularls"] = function()
-				local ok, mason_registry = pcall(require, "mason-registry")
-				if not ok then
-					vim.notify("mason-registry could not be loaded")
-					return
+		-- Set up servers
+		mason_lspconfig.setup_handlers({
+			function(server_name)
+				local config = server_configs[server_name] or {}
+				config.capabilities = capabilities
+				config.on_attach = config.on_attach or default_on_attach
+
+				if config.setup then
+					config = vim.tbl_deep_extend("force", config, config.setup())
+					config.setup = nil
 				end
 
-				local angularls_path = mason_registry.get_package("angular-language-server"):get_install_path()
-				local project_root = vim.fn.getcwd()
-				local cmd = {
-					"ngserver",
-					"--stdio",
-					"--tsProbeLocations",
-					table.concat({
-						angularls_path,
-						project_root,
-						vim.uv.cwd(),
-					}, ","),
-					"--ngProbeLocations",
-					table.concat({
-						angularls_path .. "/node_modules/@angular/language-server",
-						vim.uv.cwd(),
-					}, ","),
-				}
-
-				lspconfig["angularls"].setup({
-					capabilities = capabilities,
-					cmd = cmd,
-					on_new_config = function(new_config, _)
-						new_config.cmd = cmd
-					end,
-					root_dir = function(fname)
-						return lspconfig.util.root_pattern("angular.json", "nx.json")(fname)
-							or lspconfig.util.root_pattern("package.json", "tsconfig.json", ".git")(fname)
-					end,
-				})
-			end,
-
-			-- configure graphql language server
-			["graphql"] = function()
-				lspconfig["graphql"].setup({
-					capabilities = capabilities,
-					filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
-				})
-			end,
-
-			-- configure json language server
-			["jsonls"] = function()
-				lspconfig["jsonls"].setup({
-					capabilities = capabilities,
-					filetypes = { "json", "jsonc" },
-				})
-			end,
-
-			-- configure the gopls language server
-			["gopls"] = function()
-				local util = require("lspconfig.util")
-				local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
-
-				lspconfig["gopls"].setup({
-					cmd = { "gopls" },
-					filetypes = { "go", "gomod", "gowork", "gotmpl" },
-					capabilities = capabilities,
-					root_dir = util.root_pattern("go.work", "go.mod", ".git"),
-					on_attach = function(client, bufnr)
-						-- Your existing keymaps and other on_attach logic here
-
-						-- Add the formatting setup
-						if client.supports_method("textDocument/formatting") then
-							vim.api.nvim_clear_autocmds({
-								group = augroup,
-								buffer = bufnr,
-							})
-							vim.api.nvim_create_autocmd("BufWritePre", {
-								group = augroup,
-								buffer = bufnr,
-								callback = function()
-									vim.lsp.buf.format({ bufnr = bufnr })
-								end,
-							})
-						end
-					end,
-					settings = {
-						gopls = {
-							analyses = {
-								unusedparams = true,
-							},
-							completeUnimported = true,
-							usePlaceholders = true,
-							staticcheck = true,
-						},
-					},
-				})
-			end,
-
-			-- configure emmet language server
-			["emmet_ls"] = function()
-				lspconfig["emmet_ls"].setup({
-					capabilities = capabilities,
-					filetypes = {
-						"html",
-						"typescriptreact",
-						"javascriptreact",
-						"css",
-						"sass",
-						"scss",
-						"less",
-						"svelte",
-					},
-				})
-			end,
-
-			-- configure astro language server
-			["astro"] = function()
-				lspconfig["astro"].setup({
-					capabilities = capabilities,
-					filetypes = { "astro" },
-				})
-			end,
-
-			-- configure lua server (with special settings)
-			["lua_ls"] = function()
-				lspconfig["lua_ls"].setup({
-					capabilities = capabilities,
-					settings = {
-						Lua = {
-							-- make the language server recognize "vim" global
-							diagnostics = {
-								globals = { "vim" },
-							},
-							completion = {
-								callSnippet = "Replace",
-							},
-						},
-					},
-				})
+				lspconfig[server_name].setup(config)
 			end,
 		})
 	end,
