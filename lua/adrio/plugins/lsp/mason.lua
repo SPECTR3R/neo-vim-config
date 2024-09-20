@@ -18,19 +18,16 @@ return {
 			ui = {
 				icons = {
 					package_installed = "✓",
-					-- configure lua server (with special settings)
 					package_pending = "➜",
 					package_uninstalled = "✗",
 				},
 			},
 		})
 
-		-- configure lua server (with special settings)
-		-- configure lua server (with special settings)
 		mason_lspconfig.setup({
 			-- list of servers for mason to install
 			ensure_installed = {
-				"tsserver",
+				"ts_ls",
 				"html",
 				"cssls",
 				"tailwindcss",

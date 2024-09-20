@@ -139,6 +139,21 @@ return {
 					},
 				},
 			},
+			ts_ls = {
+				filetypes = {
+					"typescript",
+					"typescriptreact",
+					"typescript.tsx",
+					"javascript",
+					"javascriptreact",
+					"javascript.jsx",
+				},
+				init_options = {
+					preferences = {
+						disableSuggestions = true,
+					},
+				},
+			},
 			emmet_ls = {
 				filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
 			},
