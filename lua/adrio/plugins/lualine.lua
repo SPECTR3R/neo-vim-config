@@ -1,139 +1,9 @@
--- return {
---   "nvim-lualine/lualine.nvim",
---   dependencies = { "nvim-tree/nvim-web-devicons" },
---   config = function()
---     local lualine = require("lualine")
---     local lazy_status = require("lazy.status") -- to configure lazy pending updates count
---
---     local colors = {
---       blue = "#65D1FF",
---       green = "#3EFFDC",
---       violet = "#FF61EF",
---       yellow = "#FFDA7B",
---       red = "#FF4A4A",
---       fg = "#c3ccdc",
---       bg = "#112638",
---       inactive_bg = "#2c3043",
---     }
---
---     local my_lualine_theme = {
---       normal = {
---         a = { bg = colors.blue, fg = colors.bg, gui = "bold" },
---         b = { bg = colors.bg, fg = colors.fg },
---         c = { bg = colors.bg, fg = colors.fg },
---       },
---       insert = {
---         a = { bg = colors.green, fg = colors.bg, gui = "bold" },
---         b = { bg = colors.bg, fg = colors.fg },
---
---         c = { bg = colors.bg, fg = colors.fg },
---       },
---       visual = {
---         a = { bg = colors.violet, fg = colors.bg, gui = "bold" },
---         b = { bg = colors.bg, fg = colors.fg },
---         c = { bg = colors.bg, fg = colors.fg },
---       },
---       command = {
---         a = { bg = colors.yellow, fg = colors.bg, gui = "bold" },
---         b = { bg = colors.bg, fg = colors.fg },
---         c = { bg = colors.bg, fg = colors.fg },
---       },
---       replace = {
---         a = { bg = colors.red, fg = colors.bg, gui = "bold" },
---         b = { bg = colors.bg, fg = colors.fg },
---         c = { bg = colors.bg, fg = colors.fg },
---       },
---       inactive = {
---         a = { bg = colors.inactive_bg, fg = colors.semilightgray, gui = "bold" },
---         b = { bg = colors.inactive_bg, fg = colors.semilightgray },
---         c = { bg = colors.inactive_bg, fg = colors.semilightgray },
---       },
---     }
---
---     -- configure lualine with modified theme
---     lualine.setup({
---       options = {
---         theme = my_lualine_theme,
---       },
---       sections = {
---         lualine_x = {
---           {
---             lazy_status.updates,
---             cond = lazy_status.has_updates,
---             color = { fg = "#ff9e64" },
---           },
---           { "encoding" },
---           { "fileformat" },
---           { "filetype" },
---         },
---       },
---     })
---   end,
--- }
-
--- return {
--- 	"nvim-lualine/lualine.nvim",
--- 	dependencies = { "nvim-tree/nvim-web-devicons" },
--- 	config = function()
--- 		local git_blame = require("gitblame")
--- 		require("lualine").setup({
--- 			options = {
--- 				icons_enabled = true,
--- 				theme = "rose-pine",
--- 				component_separators = { left = "", right = "" },
--- 				section_separators = { left = "", right = "" },
--- 				disabled_filetypes = {
--- 					statusline = {
--- 						"neo-tree",
--- 					},
--- 					winbar = {},
--- 				},
--- 				ignore_focus = {},
--- 				always_divide_middle = true,
--- 				globalstatus = false,
--- 				refresh = {
--- 					statusline = 1000,
--- 					tabline = 1000,
--- 					winbar = 1000,
--- 				},
--- 			},
--- 			sections = {
--- 				lualine_a = { "mode" },
--- 				lualine_b = { "branch", "diff", "diagnostics" },
--- 				lualine_c = { "filename" },
--- 				lualine_x = {
--- 					{ git_blame.get_current_blame_text, cond = git_blame.is_blame_text_available },
--- 					"filetype",
--- 				},
--- 				lualine_y = { "progress" },
--- 				lualine_z = { "location" },
--- 			},
--- 			inactive_sections = {
--- 				lualine_a = {},
--- 				lualine_b = {},
--- 				lualine_c = { "filename" },
--- 				lualine_x = { "location" },
--- 				lualine_y = {},
--- 				lualine_z = {},
--- 			},
--- 			tabline = {},
--- 			winbar = {},
--- 			inactive_winbar = {},
--- 			extensions = {},
--- 		})
--- 	end,
--- }
---
---
---
---
---
 return {
 	"nvim-lualine/lualine.nvim",
 	opts = function()
 		local lspStatus = {
 			function()
-				local msg = "No LSP detected"
+				local msg = "No LSP"
 				local buf_ft = vim.api.nvim_get_option_value("filetype", {})
 				local clients = vim.lsp.get_clients()
 				if next(clients) == nil then
@@ -148,7 +18,7 @@ return {
 				return msg
 			end,
 			icon = "",
-			color = { fg = "#dd3aaa" },
+			color = { fg = "#0E1219" },
 		}
 
 		local buffer = {
@@ -172,35 +42,55 @@ return {
 				info = " ",
 				hint = " ",
 			},
-			icon = "|",
+			update_in_insert = false, -- Update diagnostics in insert mode.
 		}
 
 		local diff = {
 			"diff",
-			symbols = {
-				added = " ",
-				modified = " ",
-				removed = " ",
-			},
+			colored = false,
 		}
-
+		local colors = {
+			color2 = "#242b38",
+			color3 = "#d4bfff",
+			color4 = "#d9d7ce",
+			color5 = "#272d38",
+			color13 = "#bbe67e",
+			color10 = "#59c2ff",
+			color8 = "#f07178",
+			color9 = "#607080",
+		}
 		return {
 			options = {
 				icons_enabled = true,
 				theme = "ayu_mirage",
-				component_separators = { left = "", right = "" },
-				section_separators = { left = "", right = "" },
+				component_separators = { left = "", right = "" },
+				section_separators = { left = "", right = "" },
 				disabled_filetypes = { "alpha", "dashboard", "lazy" },
 				always_divide_middle = true,
 				globalstatus = true,
 			},
+			always_divide_middle = true,
 			sections = {
-				lualine_a = { "mode" },
-				lualine_b = { "branch" },
-				lualine_c = { buffer },
-				lualine_x = { diff, diagnostic },
-				lualine_z = { lspStatus, "filetype", "location" },
-				-- lualine_y = { "progress" },
+				lualine_a = {
+					{
+						"mode",
+						separator = { left = "", right = "" }, -- Determines what separator to use for the component.
+					},
+					"branch",
+					diff,
+				},
+				lualine_b = { buffer },
+				lualine_c = {},
+				lualine_x = {},
+				lualine_y = { diagnostic },
+				lualine_z = {
+					lspStatus,
+					{
+						"filetype",
+						icons_enabled = false,
+						separator = { left = "", right = "" }, -- Determines what separator to use for the component.
+					},
+				},
 			},
 		}
 	end,

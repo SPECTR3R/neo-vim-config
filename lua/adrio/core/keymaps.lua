@@ -36,4 +36,5 @@ keymap.set("i", "<C-s>", "<ESC>:w<CR>a", { desc = "Save the file and return to i
 
 -- Saving files
 keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save the current file" })
+keymap.set("v", "<C-s>", "<ESC>:w<CR>a", { desc = "Save the file and return to insert mode" })
 keymap.set("i", "<C-s>", "<ESC>:w<CR>a", { desc = "Save the file and return to insert mode" })
