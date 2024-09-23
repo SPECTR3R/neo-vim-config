@@ -74,7 +74,6 @@ return {
 				lualine_a = {
 					{
 						"mode",
-						separator = { left = "", right = "" }, -- Determines what separator to use for the component.
 					},
 					"branch",
 					diff,
@@ -88,7 +87,7 @@ return {
 					{
 						"filetype",
 						icons_enabled = false,
-						separator = { left = "", right = "" }, -- Determines what separator to use for the component.
+						separator = { left = "", right = "" }, -- Determines what separator to use for the component.
 					},
 				},
 			},
