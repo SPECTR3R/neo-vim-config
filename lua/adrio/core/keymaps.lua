@@ -1,10 +1,8 @@
 -- set leader key to space
 vim.g.mapleader = " "
 
-local keymap = vim.keymap -- for conciseness
-
----------------------
--- General Keymaps -------------------
+-- define keymaps for consiseness
+local keymap = vim.keymap
 
 -- use jk to exit insert mode
 keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
@@ -19,22 +17,17 @@ keymap.set("n", "x", '"_x')
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
 keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" }) -- decrement
 
--- window management
-keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }) -- split window vertically
-keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" }) -- split window horizontally
-keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
-keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }) -- close current split window
+-- buffer navigation
+keymap.set("n", "<leader>bv", "<C-w>v", { desc = "Split buffer vertically" }) -- split window vertically
+keymap.set("n", "<leader>bc", "<C-w>s", { desc = "Split buffer horizontally" }) -- split window horizontally
+keymap.set("n", "<leader>bx", "<cmd>close<CR>", { desc = "Close current split" }) -- close current split window
+keymap.set("n", "<leader>x", "<cmd>:bdelete<CR>", { desc = "Close current buffer" })
+keymap.set("n", "<leader>]", "<cmd>bn<CR>", { desc = "Navigate to next buffer" })
+keymap.set("n", "<leader>[", "<cmd>bp<CR>", { desc = "Navigate to previous buffer" })
 
-keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
-keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab
-keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
-keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
-keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
-
-keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save the current file" })
-keymap.set("i", "<C-s>", "<ESC>:w<CR>a", { desc = "Save the file and return to insert mode" })
+-- close current buffer
 
 -- Saving files
-keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save the current file" })
-keymap.set("v", "<C-s>", "<ESC>:w<CR>a", { desc = "Save the file and return to insert mode" })
-keymap.set("i", "<C-s>", "<ESC>:w<CR>a", { desc = "Save the file and return to insert mode" })
+keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save current file" })
+keymap.set("v", "<C-s>", "<ESC>:w<CR>a", { desc = "Save current file" })
+keymap.set("i", "<C-s>", "<ESC>:w<CR>a", { desc = "Save current file" })
