@@ -2,17 +2,18 @@ local opt = vim.opt -- for conciseness
 
 vim.cmd("let g:netrw_liststyle = 3")
 
--- line numbers
-opt.relativenumber = true -- show relative line numbers
-opt.number = true -- shows absolute line number on cursor line (when relative number is on)
+-- Show line numbers and relative line numbers simultaneously
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.statuscolumn = "%s  %l  %r "
 
--- tabs & indentation
+-- Tabs & indentation
 opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
 opt.shiftwidth = 2 -- 2 spaces for indent width
 opt.expandtab = true -- expand tab to spaces
 opt.autoindent = true -- copy indent from current line when starting new one
 
--- line wrapping
+-- Line wrapping
 opt.wrap = false -- disable line wrapping
 
 -- search settings
