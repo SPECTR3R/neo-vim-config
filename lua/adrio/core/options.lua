@@ -3,9 +3,13 @@ local opt = vim.opt -- for conciseness
 vim.cmd("let g:netrw_liststyle = 3")
 
 -- Show line numbers and relative line numbers simultaneously
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.statuscolumn = "%s  %l  %r "
+-- vim.opt.number = true
+-- vim.opt.relativenumber = true
+-- vim.opt.statuscolumn = "%s %=%l %=%r "
+-- vim.opt.statuscolumn = '%s %#NonText#%=%{&nu?v:lnum:""}'
+-- 	.. '%=%{&rnu&&(v:lnum%2)?"\\ ".v:relnum:""}'
+-- 	.. '%#LineNr#%{&rnu&&!(v:lnum%2)?"\\ ".v:relnum:""}│ '
+-- vim.opt.numberwidth = 4
 
 -- Tabs & indentation
 opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
