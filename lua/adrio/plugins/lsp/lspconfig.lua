@@ -158,7 +158,9 @@ return {
 				filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
 			},
 			astro = {
+				cmd = { "astro-ls", "--stdio" },
 				filetypes = { "astro" },
+				root_dir = lspconfig.util.root_pattern("astro.config.js", ".astro"),
 			},
 			lua_ls = {
 				settings = {
